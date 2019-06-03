@@ -66,7 +66,7 @@ See the table below for detailed instrucions.
 
 | Variable Name     | Example           | Description                    |
 | ----------------- | ----------------- | ------------------------------ |
-| SERVER_VERSION    | 7.0.0             | Seafile Version                |
+| SERVER_VERSION    | 7.0.0             | Seafile Version. Get all available versions from [here](https://github.com/haiwen/seafile-server/tags) |
 | SERVER_NAME       | www.example.org   | IP Address or hostname where the server can be accessed. **Set this twice**\*. |
 | PORT              | 8080              | Port where the server can be accessed. **Set this twice**\*. |
 | MYSQL_ROOT_PASSWD | ***************** | MySQL root password. **Set this twice**\*. |
