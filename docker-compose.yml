@@ -4,11 +4,7 @@ services:
         build:
             context: build
             args:
-              # Adapt according to your needs -------->
-              # Get the latest tag from GitHub:
-              # https://github.com/haiwen/seafile-server/releases/latest
               - "SERVER_VERSION=7.0.0"
-              # <--------
         image: jojo243/seafile-base
         container_name: seafile_base
         volumes:
