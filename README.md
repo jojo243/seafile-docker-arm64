@@ -10,7 +10,7 @@ The Seafile Maintainers provide a dockerized setup themselves (https://github.co
 
 ## Overview
 
-![](components-overview.svg)
+![](components-overview.png)
 
 We use three main docker images to separate the different components from each other.
 - **nginx** acts as a reverse proxy for the main seafile server w/ seahub.
