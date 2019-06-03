@@ -1,0 +1,75 @@
+version: '2'
+services:
+    baseimage:
+        build:
+            context: build
+            args:
+              # Adapt according to your needs -------->
+              # Get the latest tag from GitHub:
+              # https://github.com/haiwen/seafile-server/releases/latest
+              - "SERVER_VERSION=7.0.0"
+              # <--------
+        image: jojo243/seafile-base
+        container_name: seafile_base
+        volumes:
+            - ./build/src:/haiwen
+    seafile:
+        build:
+            context: seafile
+        restart: always
+        image: jojo243/seafile
+        container_name: seafile_seafile
+        volumes:
+            - ./build/src/:/usr/src/
+            - ./seafile/haiwen:/haiwen/
+            - ./seafile/seafile/:/data/
+        depends_on:
+            - mysql
+        environment:
+            - "LC_ALL=C"
+            # Adapt according to your needs -------->
+            - "SERVER_NAME=www.example.org" # May also be localhost or an IP Address, must match SERVER_NAME below
+            - "PORT=8080" # must match PORT below
+            - "MYSQL_ROOT_PASSWD=pleaseinsertareasonablepassword" # should be same as below
+            - "MYSQL_USER_PASSWD=12345678" # not needed most of the time
+            - "ADMIN_EMAIL=admin@example.org" # email of the admin account
+            - "ADMIN_PASSWORD=changethissoon"
+            - "SSL=1" # SSL=1: Use SSl; SSL=0: Don't use SSL
+            # <--------
+    nginx:
+        restart: always
+        image: arm64v8/nginx
+        container_name: seafile_nginx
+        volumes:
+            - ./nginx/init/:/init/
+            - ./nginx/conf/:/opt/conf/
+            - ./seafile/haiwen/:/opt/seafile/
+            - ./ssl:/opt/ssl:ro
+        entrypoint: /init/init.sh
+        command: ["nginx", "-g", "daemon off;"]
+        ports:
+            # Adapt according to your needs
+            - 8080:8080
+            # outer:inner, outer = port where seafile can be accessed from outside, must match SERVER_NAME (above)
+            #              inner = port where nginx listens internally
+        environment:
+            # Adapt according to your needs -------->
+            - "SERVER_NAME=www.example.org" # May also be localhost or an IP Address, must match SERVER_NAME above
+            - "PORT=8080" # Must be the same as the "inner" port above, and must match PORT above
+            # <--------
+        depends_on:
+            - seafile
+    mysql:
+        build:
+            context: mysql
+        restart: always
+        image: jojo243/mysql
+        container_name: seafile_mysql
+        volumes:
+            - ./mysql/data:/var/lib/mysql
+        environment:
+            # Adapt according to your needs -------->
+            - "MYSQL_ROOT_PASSWORD=pleaseinsertareasonablepassword" # should be same as above
+            # <--------
+        depends_on:
+            - baseimage
