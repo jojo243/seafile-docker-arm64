@@ -27,8 +27,8 @@ We use three main docker images to separate the different components from each o
 - **\>= 1 GB of RAM**, *Recommended*: ~= 4 GB of RAM (needed for compilation of lxml)
 - *Recommended*: >= **30 GB of disk space** per user
 
-**Note**: If your Hardware doesn't have enough RAM, you won't be able to
-build seafile and thus cannot enjoy the latest version. Don't worry, it will work anyway. The procdure is described [below](#Low-RAM)
+**Note**: *If your Hardware doesn't have enough RAM, you won't be able to
+build seafile and thus cannot enjoy the latest version. Don't worry, it will work anyway. The procdure is described [below](#Low-RAM).*
 
 Specifically, this setup has been tested on:
 
@@ -129,6 +129,23 @@ you can access the seahub webinterface at http(s):\/\/SERVER_NAME:PORT.
 Log in with your ADMIN_EMAIL and ADMIN_PASSWORD.
 After that, change your ADMIN_PASSWORD via webinterface.
 
+## Running
+
+Start Seafile in background.
+
+```bash
+make
+```
+
+You can now access the seahub webinterface at http(s):\/\/SERVER_NAME:PORT.
+Seafile will start up automatically, you wont need start it everytime you boot up your system.
+
+## Stopping
+
+```bash
+make 3
+```
+
 ## Low RAM
 
 You will have to rely on the [official seafile builds for Raspberry Pi](https://github.com/haiwen/seafile-rpi). Just grab the latest release, uncompress it and place it inside `build/src`:
@@ -158,23 +175,6 @@ services:
         build:
             ...
         ...
-```
-
-## Running
-
-Start Seafile in background.
-
-```bash
-make
-```
-
-You can now access the seahub webinterface at http(s):\/\/SERVER_NAME:PORT.
-Seafile will start up automatically, you wont need start it everytime you boot up your system.
-
-## Stopping
-
-```bash
-make 3
 ```
 
 ## Troubleshooting
