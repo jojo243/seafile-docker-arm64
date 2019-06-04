@@ -23,7 +23,7 @@ We use three main docker images to separate the different components from each o
 
 ### Hardware Prerequisites
 
-- CPU with **ARMv8 64-bit** archicture (e.g. SBCs listed below)
+- CPU with **ARMv8 64-bit** architecture (e.g. SBCs listed below)
 - **\>= 1 GB of RAM**, *Recommended*: ~= 4 GB of RAM (needed for compilation of lxml)
 - *Recommended*: >= **30 GB of disk space** per user
 
