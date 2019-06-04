@@ -86,10 +86,10 @@ See the table below for detailed instrucions.
 To enable SSL (https:\/\/SERVER_NAME:PORT)
 
 1. Set `SSL` to 1.
-2. Create a folder name `ssl` inside `nginx`.
+2. Create a folder named `ssl`.
 
     ```bash
-    mkdir -p nginx/ssl
+    mkdir -p ssl
     ```
 3. Copy your SSL Certs (`fullchain.pem` and `privkey.pem`) as well as a
 DH params file (`dhparams.pem`) into that directory.
@@ -99,7 +99,7 @@ If you don't have such files, follow the instructions
 should do the trick for the last one:
 
     ```bash
-    openssl dhparam 2048 > nginx/ssl/dhparam.pem
+    openssl dhparam 2048 > ssl/dhparam.pem
     ```
 
 4. Make sure your user owns the SLL folder:
