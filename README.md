@@ -15,6 +15,7 @@ The Seafile Maintainers provide a dockerized setup themselves (https://github.co
 We use three main docker images to separate the different components from each other.
 - **nginx** acts as a reverse proxy for the main seafile server w/ seahub.
 - **seafile** is the main application, built and packaged using the procedure described [in the official manual](https://manual.seafile.com/build_seafile/rpi.html).
+
    *Note:* Building and packaging is done seperately, inside the **build** image.
 - **mysql** is the application database.
 
@@ -22,14 +23,12 @@ We use three main docker images to separate the different components from each o
 
 ### Hardware Prerequisites
 
-- CPU with ARMv8 64-bit archicture (e.g. SBCs listed below)
-- \>= 1 GB of RAM, *Recommended*: ~= 4 GB of RAM (needed for compilation of lxml)
-- *Recommended*: >= 30 GB of disk space per user
+- CPU with **ARMv8 64-bit** archicture (e.g. SBCs listed below)
+- **\>= 1 GB of RAM**, *Recommended*: ~= 4 GB of RAM (needed for compilation of lxml)
+- *Recommended*: >= **30 GB of disk space** per user
 
 **Note**: If your Hardware doesn't have enough RAM,
-you have to rely on the official seafile builds for Raspberry Pi
-(https://github.com/haiwen/seafile-rpi). That way, you may need
-Just grab the latest release, uncompress it
+you have to rely on the [official seafile builds for Raspberry Pi](https://github.com/haiwen/seafile-rpi). Just grab the latest release, uncompress it
 and place it inside `build/src`:
 
 ```bash
