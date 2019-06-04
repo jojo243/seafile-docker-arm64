@@ -105,7 +105,7 @@ See the table below for detailed instrucions.
 | MYSQL_USER_PASSWD | 12345678          | MySQL user password. Not needed most of the time. |
 | ADMIN_EMAIL       | admin@example.org | Email of the admin account.    |
 | ADMIN_PASSWORD    | ***************** | Password of the admin account. |
-| SSL               | 1                 | Whether to use SSL (0/1).      |
+| SSL               | 1                 | Whether to use SSL (0/1). **Set this twice**\*.     |
 
 \* This variable has to be set to the same value in two places inside the `docker-compose.yml`.
 
@@ -130,6 +130,12 @@ should do the trick for the last one:
     openssl dhparam 2048 > nginx/ssl/dhparam.pem
     ```
 
+4. Make sure your user owns the SLL folder:
+
+    ```bash
+    sudo chown -R $USER ssl
+    ```
+
 ## Building
 
 Make sure you adapted everything inside the `docker-compose.yml` according to
@@ -139,7 +145,21 @@ your needs. Now build the whole thing (this may take a while):
 make 1
 ```
 
+It's recommended to run the first startup in foreground so you can
+see what's going on.
+
+```bash
+make up
+```
+
+After the startup procedure (it may take a while when first starting seafile)
+you can access the seahub webinterface at http(s):\/\/SERVER_NAME:PORT.
+Log in with your ADMIN_EMAIL and ADMIN_PASSWORD.
+After that, change your ADMIN_PASSWORD via webinterface.
+
 ## Running
+
+Start Seafile in background.
 
 ```bash
 make

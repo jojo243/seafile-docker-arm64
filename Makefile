@@ -41,6 +41,6 @@ clean:
 	make down
 	for dir in $(CLEANDIRS); do \
 		if [ -d $$dir ]; then \
-			rm -rf $$dir; \
+			sudo rm -rf $$dir; \
 		fi; \
 	done

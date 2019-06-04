@@ -70,7 +70,8 @@ RUN		mkdir -p dev/seahub_thirdpart && \
 		cd dev/seahub_thirdpart && \
 		mv ../../requirements.txt . && \
 		echo "flup" | tee -a requirements.txt && \
-		PYTHONUSERBASE=. pip install --user -r requirements.txt
+		pip install --user -r requirements.txt && \
+		mv ~/.local/* .
 
 # For whatever reason, the ac_init call of seafile, ccnet, etc. happens which "6.0.1" (1.2.2 for libsearpc),
 # thus every corresponding entry in configure.ac must be found and replaced with ${*PACKAGE*_VERSION}.

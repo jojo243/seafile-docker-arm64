@@ -52,6 +52,7 @@ services:
             # Adapt according to your needs -------->
             - "SERVER_NAME=www.example.org" # May also be localhost or an IP Address, must match SERVER_NAME above
             - "PORT=8080" # Must be the same as the "inner" port above, and must match PORT above
+            - "SSL=1" # SSL=1: Use SSl; SSL=0: Don't use SSL
             # <--------
         depends_on:
             - seafile
