@@ -47,7 +47,7 @@ RUN 		apt-get update && apt-get -y install \
 			# git \
 			libonig-dev \
 			libssl1.0-dev \
-            		# libjpeg-dev \
+			# libjpeg-dev \
 			# zlib1g-dev \
 			build-essential && \
 		mkdir -p dev && \
@@ -70,8 +70,7 @@ RUN		mkdir -p dev/seahub_thirdpart && \
 		cd dev/seahub_thirdpart && \
 		mv ../../requirements.txt . && \
 		echo "flup" | tee -a requirements.txt && \
-		echo "gunicorn==19.8.1" | tee -a requirements.txt && \
-		pip install --install-option="--prefix=$PREFIX_PATH/dev/seahub_thirdpart" -r requirements.txt
+		PYTHONUSERBASE=. pip install --user -r requirements.txt
 
 # For whatever reason, the ac_init call of seafile, ccnet, etc. happens which "6.0.1" (1.2.2 for libsearpc),
 # thus every corresponding entry in configure.ac must be found and replaced with ${*PACKAGE*_VERSION}.
