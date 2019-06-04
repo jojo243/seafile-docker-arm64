@@ -28,36 +28,7 @@ We use three main docker images to separate the different components from each o
 - *Recommended*: >= **30 GB of disk space** per user
 
 **Note**: If your Hardware doesn't have enough RAM, you won't be able to
-build seafile and thus cannot enjoy the latest version.
-You will have to rely on the [official seafile builds for Raspberry Pi](https://github.com/haiwen/seafile-rpi). Don't worry, it will work anyway.
-Just grab the latest release, uncompress it and place it inside `build/src`:
-
-```bash
-SERVER_VERSION=6.3.4
-wget https://github.com/haiwen/seafile-rpi/releases/download/v${SERVER_VERSION}/seafile-server_${SERVER_VERSION}_stable_pi.tar.gz
-tar -xzf seafile-server_*.tar.gz
-rm seafile-server_*.tar.gz
-mv seafile-server* build/src/seafile-server
-```
-
-Additionally, you will have to comment out the whole `baseimage` target inside `docker-compose.yml`:
-
-```yaml
-services:
-#    baseimage:
-#        build:
-#            context: build
-#            args:
-#              - "SERVER_VERSION=7.0.0"
-#        image: jojo243/seafile-base
-#        container_name: seafile_base
-#        volumes:
-#            - ./build/src:/haiwen
-    seafile:
-        build:
-            ...
-        ...
-```
+build seafile and thus cannot enjoy the latest version. Don't worry, it will work anyway. The procdure is described [below](#Low-RAM)
 
 Specifically, this setup has been tested on:
 
@@ -157,6 +128,37 @@ After the startup procedure (it may take a while when first starting seafile)
 you can access the seahub webinterface at http(s):\/\/SERVER_NAME:PORT.
 Log in with your ADMIN_EMAIL and ADMIN_PASSWORD.
 After that, change your ADMIN_PASSWORD via webinterface.
+
+## Low RAM
+
+You will have to rely on the [official seafile builds for Raspberry Pi](https://github.com/haiwen/seafile-rpi). Just grab the latest release, uncompress it and place it inside `build/src`:
+
+```bash
+SERVER_VERSION=6.3.4
+wget https://github.com/haiwen/seafile-rpi/releases/download/v${SERVER_VERSION}/seafile-server_${SERVER_VERSION}_stable_pi.tar.gz
+tar -xzf seafile-server_*.tar.gz
+rm seafile-server_*.tar.gz
+mv seafile-server* build/src/seafile-server
+```
+
+Additionally, you will have to comment out the whole `baseimage` target inside `docker-compose.yml`:
+
+```yaml
+services:
+#    baseimage:
+#        build:
+#            context: build
+#            args:
+#              - "SERVER_VERSION=7.0.0"
+#        image: jojo243/seafile-base
+#        container_name: seafile_base
+#        volumes:
+#            - ./build/src:/haiwen
+    seafile:
+        build:
+            ...
+        ...
+```
 
 ## Running
 
