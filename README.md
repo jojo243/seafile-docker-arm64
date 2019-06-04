@@ -14,7 +14,8 @@ The Seafile Maintainers provide a dockerized setup themselves (https://github.co
 
 We use three main docker images to separate the different components from each other.
 - **nginx** acts as a reverse proxy for the main seafile server w/ seahub.
-- **seafile** is the main application, built and packaged using the procedure described [in the official manual](https://manual.seafile.com/build_seafile/rpi.html). *Note:* Building and packaging is done seperately, inside the **build** image.
+- **seafile** is the main application, built and packaged using the procedure described [in the official manual](https://manual.seafile.com/build_seafile/rpi.html).
+   *Note:* Building and packaging is done seperately, inside the **build** image.
 - **mysql** is the application database.
 
 ## Prerequisites
@@ -22,8 +23,41 @@ We use three main docker images to separate the different components from each o
 ### Hardware Prerequisites
 
 - CPU with ARMv8 64-bit archicture (e.g. SBCs listed below)
-- *Recommended*: >= 1 GB of RAM
+- >= 1 GB of RAM, *Recommended*: ~= 4 GB of RAM (needed for compilation of lxml)
 - *Recommended*: >= 30 GB of disk space per user
+
+**Note**: If your Hardware doesn't have enough RAM,
+you have to rely on the official seafile builds for Raspberry Pi
+(https://github.com/haiwen/seafile-rpi). That way, you may need
+Just grab the latest release, uncompress it
+and place it inside `build/src`:
+
+```bash
+SERVER_VERSION=6.3.4
+wget https://github.com/haiwen/seafile-rpi/releases/download/v${SERVER_VERSION}/seafile-server_${SERVER_VERSION}_stable_pi.tar.gz
+tar -xzf seafile-server_*.tar.gz
+rm seafile-server_*.tar.gz
+mv seafile-server* build/src/seafile-server
+```
+
+Additionally, you will have to comment out the whole `baseimage` target inside `docker-compose.yml`:
+
+```yaml
+services:
+#    baseimage:
+#        build:
+#            context: build
+#            args:
+#              - "SERVER_VERSION=7.0.0"
+#        image: jojo243/seafile-base
+#        container_name: seafile_base
+#        volumes:
+#            - ./build/src:/haiwen
+    seafile:
+        build:
+            ...
+        ...
+```
 
 Specifically, this setup has been tested on:
 

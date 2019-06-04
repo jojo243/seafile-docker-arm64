@@ -67,5 +67,3 @@ services:
             # Adapt according to your needs -------->
             - "MYSQL_ROOT_PASSWORD=pleaseinsertareasonablepassword" # should be same as above
             # <--------
-        depends_on:
-            - baseimage
