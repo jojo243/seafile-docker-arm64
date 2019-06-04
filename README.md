@@ -180,6 +180,5 @@ make 3
     Most likely, seahub is not started.
 
     ```
-    cd seafile
     docker-compose exec seafile bash -c "cd seafile-server-latest && ./seahub.sh start"
     ```
