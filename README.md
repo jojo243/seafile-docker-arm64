@@ -117,15 +117,39 @@ your needs. Now build the whole thing (this may take a while):
 make 1
 ```
 
-It's recommended to run the first startup in foreground so you can
-see what's going on.
+Run the first startup in foreground so you can see what's going on.
 
 ```bash
 make up
 ```
 
-After the startup procedure (it may take a while when first starting seafile)
-you can access the seahub webinterface at http(s):\/\/SERVER_NAME:PORT.
+Wait for the startup procedure to complete
+(it may take a while when first starting seafile).
+You will see something like this:
+
+```txt
+seafile_seafile | Starting seahub at port 8000 ...
+seafile_seafile |
+seafile_seafile |
+seafile_seafile |
+seafile_seafile | ----------------------------------------
+seafile_seafile | Successfully created seafile admin
+seafile_seafile | ----------------------------------------
+seafile_seafile |
+seafile_seafile |
+seafile_seafile |
+seafile_seafile |
+seafile_seafile | Seahub is started
+```
+
+Everything is now set up.
+Now, stop the first run be typing `Ctrl+C` and start seafile in background.
+
+```bash
+make
+```
+
+You can access the seahub webinterface at http(s):\/\/SERVER_NAME:PORT.
 Log in with your ADMIN_EMAIL and ADMIN_PASSWORD.
 After that, change your ADMIN_PASSWORD via webinterface.
 
