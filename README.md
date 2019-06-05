@@ -167,7 +167,7 @@ Seafile will start up automatically, you wont need start it everytime you boot u
 ## Stopping
 
 ```bash
-make 3
+make down
 ```
 
 ## Low RAM
@@ -204,8 +204,16 @@ services:
 ## Troubleshooting
 
 - `Error 502: Bad Gateway.`
+
     Most likely, seahub is not started.
 
     ```
     docker-compose exec seafile bash -c "cd seafile-server-latest && ./seahub.sh start"
+    ```
+
+    Secondly, try restarting the application:
+
+    ```
+    make down
+    make
     ```
