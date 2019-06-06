@@ -18,8 +18,11 @@ RUN 	set -x \
 		&& export GNUPGHOME="$(mktemp -d)" \
 		&& key=B42F6819007F00F88E364FD4036A9C25BF357DD4 \
 		&& gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
+			gpg --keyserver pgp.mit.edu:80 --recv-keys "$key" || \
 			gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \
+			gpg --keyserver keyserver.pgp.com:80 --recv-keys "$key" || \
     			gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" \
+    			gpg --keyserver ha.pool.sks-keyservers.net:80 --recv-keys "$key" \
 		&& gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
 		&& rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc \
 		&& chmod +x /usr/local/bin/gosu \
