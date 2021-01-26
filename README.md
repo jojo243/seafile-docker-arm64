@@ -109,9 +109,9 @@ In that case,
   #          # <--------
           ...
   ```
-2. Configure `MYSQL_HOST`/`MYSQL_PORT` in the `seafile`-section to reflect the hostname of the MySQL database.
+2. Configure `MYSQL_HOST`/`MYSQL_PORT` in the `seafile`-section to reflect the location of the MySQL database.
 
-  **Note**: The hostname must be accessible *from within the seafile docker container*. That means, if you specify `localhost` here, the database won't be accessible and an error will be thrown during the installation process. Specify either the IP address of the host or make sure the database is accessible from within the container otherwise. E.g., if the database is running inside another docker container, create a `docker network` and add both the `seafile`-container and the mysql container to that.
+    **Note**: The hostname must be accessible *from within the seafile docker container*. That means, if you specify `localhost` here, the database won't be accessible and an error will be thrown during the installation process. Specify either the IP address of the host or make sure the database is accessible from within the container otherwise. E.g., if the database is running inside another docker container, create a `docker network` and add both the `seafile`-container and the mysql container to that.
 
 ### SSL Configuration
 
