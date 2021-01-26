@@ -73,6 +73,8 @@ See the table below for detailed instrucions.
 | ----------------- | ----------------- | ------------------------------ |
 | SERVER_NAME       | www.example.org   | IP Address or hostname where the server can be accessed. **Set this twice**\*. |
 | PORT              | 8080              | Port where the server can be accessed. **Set this twice**\*. |
+| MYSQL_HOST        | mysql             | MySQL host; do not change unless you're using a different mysql database |
+| MYSQL_PORT        | 3306              | MySQL port; do not change unless you're using a different mysql database |
 | MYSQL_ROOT_PASSWD | ***************** | MySQL root password. **Set this twice**\*. |
 | MYSQL_USER_PASSWD | 12345678          | MySQL user password. Not needed most of the time. |
 | ADMIN_EMAIL       | admin@example.org | Email of the admin account.    |
@@ -80,6 +82,36 @@ See the table below for detailed instrucions.
 | SSL               | 1                 | Whether to use SSL (0/1). **Set this twice**\*.     |
 
 \* This variable has to be set to the same value in two places inside the `docker-compose.yml`.
+
+### Using a different MySQL database
+
+The idea behind this project is to have Seafile set up as simple as possible. Therefore, the most straightforward option is taken here, which is to ship the application database with Seafile and run it in a container.
+
+However, if you already have a mysql database in place, it may make more sense to use that instance for seafile.
+
+In that case,
+
+1. comment out or delete the `mysql`-section inside the `docker-compose.yml`.
+  ```yaml
+  services:
+      ...
+  #    mysql:
+  #        build:
+  #            context: mysql
+  #        restart: always
+  #        image: jojo243/mysql
+  #        container_name: seafile_mysql
+  #        volumes:
+  #          - ./mysql/data:/var/lib/mysql
+  #        environment:
+  #          # Adapt according to your needs -------->
+  #          - "MYSQL_ROOT_PASSWORD=pleaseinsertareasonablepassword" # should be same as above
+  #          # <--------
+          ...
+  ```
+2. Configure `MYSQL_HOST`/`MYSQL_PORT` in the `seafile`-section to reflect the location of the MySQL database.
+
+    **Note**: The hostname must be accessible *from within the seafile docker container*. That means, if you specify `localhost` here, the database won't be accessible and an error will be thrown during the installation process. Specify either the IP address of the host or make sure the database is accessible from within the container otherwise. E.g., if the database is running inside another docker container, create a `docker network` and add both the `seafile`-container and the mysql container to that.
 
 ### SSL Configuration
 
