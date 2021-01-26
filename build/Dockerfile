@@ -1,4 +1,4 @@
-FROM 		arm64v8/buildpack-deps:stretch
+FROM		arm64v8/buildpack-deps:stretch
 
 ARG		GITHUB=https://www.github.com/
 ARG		REPO=haiwen
@@ -19,7 +19,7 @@ ARG		PKG_CONFIG_PATH=${PREFIX_PATH}/dev/libsearpc:$PKG_CONFIG_PATH
 ARG		PKG_CONFIG_PATH=${PREFIX_PATH}/dev/ccnet-server:$PKG_CONFIG_PATH
 
 # Tags & Versions
-ARG		LIBSEARPC_VERSION=3.0
+ARG		LIBSEARPC_VERSION=3.2
 ARG		LIBSEARPC_TAG=v${LIBSEARPC_VERSION}-latest
 ARG		SERVER_VERSION
 ARG		SERVER_TAG=v${SERVER_VERSION}-server
@@ -27,7 +27,7 @@ ARG		SERVER_TAG=v${SERVER_VERSION}-server
 WORKDIR		${PREFIX_PATH}
 
 # alpine: apk add --no-cache --update libevent-dev libcurl
-RUN 		apt-get update && apt-get -y install \
+RUN		apt-get update && apt-get -y install \
 			# libevent-dev \
 			# libglib2.0-dev \
 			uuid-dev \
@@ -56,7 +56,7 @@ RUN 		apt-get update && apt-get -y install \
 		find /var/cache/apt/ -type f -exec rm -v {} \;
 
 # libevhtp
-RUN 		cd dev && \
+RUN		cd dev && \
 			git clone ${LIBEVHTP_URL} && \
 			cd libevhtp && \
 			cmake -DEVHTP_DISABLE_SSL=ON -DEVHTP_BUILD_SHARED=OFF . && \
@@ -71,6 +71,7 @@ RUN		mkdir -p dev/seahub_thirdpart && \
 		mv ../../requirements.txt . && \
 		echo "flup" | tee -a requirements.txt && \
 		pip install --user -r requirements.txt && \
+		pip install --user jsonfield==2.1.1 django-appconf==1.0.2 && \
 		mv ~/.local/* .
 
 # For whatever reason, the ac_init call of seafile, ccnet, etc. happens which "6.0.1" (1.2.2 for libsearpc),
@@ -78,7 +79,7 @@ RUN		mkdir -p dev/seahub_thirdpart && \
 # `sed -i` does this.
 # libsearpc
 RUN		cd dev && \
- 		git clone ${LIBSEARPC_URL} && \
+		git clone ${LIBSEARPC_URL} && \
 		cd libsearpc && \
 		git reset --hard ${LIBSEARPC_TAG} && \
 		sed -i "s/1.2.2/${LIBSEARPC_VERSION}/g" configure.ac && \
@@ -132,7 +133,7 @@ RUN		cd dev && \
 # For whatever reason, the ac_init call of seafile, ccnet, etc. happens which "6.0.1" (1.2.2 for libsearpc),
 # thus every corresponding entry in configure.ac must be found and replaced with ${*PACKAGE*_VERSION}.
 # `sed -i` does this.
-RUN  		sed -i "s/--enable-ldap//g" dev/seafile-server/scripts/build/build-server.py && \
+RUN		sed -i "s/--enable-ldap//g" dev/seafile-server/scripts/build/build-server.py && \
 			mkdir seafile-sources && \
 			cp dev/libsearpc/libsearpc-${LIBSEARPC_VERSION}.tar.gz seafile-sources && \
 			cp dev/ccnet-server/ccnet-${SERVER_VERSION}.tar.gz seafile-sources && \
@@ -160,11 +161,11 @@ FROM	        alpine:edge
 
 COPY		--from=0 /usr/src/seafile-server-pkgs/* /usr/src/
 
-RUN         	busybox tar -xzf /usr/src/seafile-server_*.tar.gz -C /usr/src/ && \
-               		rm /usr/src/seafile-server_*.tar.gz && \
-                	mv /usr/src/seafile-server* /usr/src/seafile-server
+RUN		busybox tar -xzf /usr/src/seafile-server_*.tar.gz -C /usr/src/ && \
+			rm /usr/src/seafile-server_*.tar.gz && \
+			mv /usr/src/seafile-server* /usr/src/seafile-server
 
 # Include this volume in containers/seafile/build/<tarballdir> so it becomes available to the host.
-VOLUME      	/haiwen
+VOLUME		/haiwen
 
-CMD         	["cp", "-r", "/usr/src/seafile-server", "haiwen/"]
+CMD		["cp", "-r", "/usr/src/seafile-server", "haiwen/"]

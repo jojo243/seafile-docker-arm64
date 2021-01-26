@@ -1,4 +1,4 @@
-version: '2'
+version: "3.7"
 services:
     baseimage:
         build:
@@ -27,7 +27,7 @@ services:
 
     nginx:
         restart: always
-        image: arm64v8/nginx
+        image: arm64v8/nginx:alpine
         container_name: seafile_nginx
         volumes:
             - ./nginx/init/:/init/
