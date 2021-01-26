@@ -85,13 +85,15 @@ In that case,
   services:
       ...
   #    db:
+  #        restart: always
   #        build:
   #            context: db
-  #        restart: always
-  #        image: jojo243/mysql
+  #            args:
+  #              - MYSQL_VERSION=${MYSQL_VERSION}
+  #        image: jojo243/mysql:${MYSQL_VERSION}
   #        container_name: seafile_db
   #        volumes:
-  #          - ./db/data:/var/lib/mysql
+  #          - ./db/data:/db/mysql
   #        env_file: .env
       ...
   ```
