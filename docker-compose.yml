@@ -4,7 +4,7 @@ services:
         build:
             context: build
             args:
-              - "SERVER_VERSION=7.0.0"
+              - "SERVER_VERSION=${SERVER_VERSION}"
         image: jojo243/seafile-base
         container_name: seafile_base
         volumes:
@@ -20,20 +20,11 @@ services:
             - ./seafile/haiwen:/haiwen/
             - ./seafile/seafile/:/data/
         depends_on:
-            - mysql
+            - db
+        env_file: .env
         environment:
             - "LC_ALL=C"
-            # Adapt according to your needs -------->
-            - "SERVER_NAME=www.example.org" # May also be localhost or an IP Address, must match SERVER_NAME below
-            - "PORT=8080" # must match PORT below
-            - "MYSQL_HOST=mysql" # normally, this is fine, change only if you're using a different mysql database
-            - "MYSQL_PORT=3306" # normally, this is fine, change only if you're using a different mysql database
-            - "MYSQL_ROOT_PASSWD=pleaseinsertareasonablepassword" # should be same as below
-            - "MYSQL_USER_PASSWD=12345678" # not needed most of the time
-            - "ADMIN_EMAIL=admin@example.org" # email of the admin account
-            - "ADMIN_PASSWORD=changethissoon"
-            - "SSL=1" # SSL=1: Use SSl; SSL=0: Don't use SSL
-            # <--------
+
     nginx:
         restart: always
         image: arm64v8/nginx
@@ -46,27 +37,16 @@ services:
         entrypoint: /init/init.sh
         command: ["nginx", "-g", "daemon off;"]
         ports:
-            # Adapt according to your needs
-            - 8080:8080
-            # outer:inner, outer = port where seafile can be accessed from outside, must match SERVER_NAME (above)
-            #              inner = port where nginx listens internally
-        environment:
-            # Adapt according to your needs -------->
-            - "SERVER_NAME=www.example.org" # May also be localhost or an IP Address, must match SERVER_NAME above
-            - "PORT=8080" # Must be the same as the "inner" port above, and must match PORT above
-            - "SSL=1" # SSL=1: Use SSl; SSL=0: Don't use SSL
-            # <--------
+            - ${PORT}:8080
+        env_file: .env
         depends_on:
             - seafile
-    mysql:
+    db:
         build:
-            context: mysql
+            context: db
         restart: always
         image: jojo243/mysql
-        container_name: seafile_mysql
+        container_name: seafile_db
         volumes:
-            - ./mysql/data:/var/lib/mysql
-        environment:
-            # Adapt according to your needs -------->
-            - "MYSQL_ROOT_PASSWORD=pleaseinsertareasonablepassword" # should be same as above
-            # <--------
+            - ./db/data:/var/lib/mysql
+        env_file: .env

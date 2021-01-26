@@ -1,4 +1,5 @@
-mysql/data
+db/data
 seafile/haiwen
 seafile/seafile
 build/src
+.env

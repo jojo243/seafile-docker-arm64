@@ -62,26 +62,15 @@ cd seafile-docker-arm64
 
 ## Configuration
 
-Make yourself familiar with the `docker-compose.yml`. Most of the configuration
-is done there. Note the instructions and hints inside the `docker-compose.yml`
-and adapt everything to your needs (The least thing you probably want to do is
-change the server name).
+1. Take a look at the `.env.example`. Most of the configuration
+is done there.
 
-See the table below for detailed instrucions.
+2. Copy that file or rename it to `.env`. The `docker-compose.yml` looks for that file.
+  ```bash
+cp .env.example .env
+```
 
-| Variable Name     | Example           | Description                    |
-| ----------------- | ----------------- | ------------------------------ |
-| SERVER_NAME       | www.example.org   | IP Address or hostname where the server can be accessed. **Set this twice**\*. |
-| PORT              | 8080              | Port where the server can be accessed. **Set this twice**\*. |
-| MYSQL_HOST        | mysql             | MySQL host; do not change unless you're using a different mysql database |
-| MYSQL_PORT        | 3306              | MySQL port; do not change unless you're using a different mysql database |
-| MYSQL_ROOT_PASSWD | ***************** | MySQL root password. **Set this twice**\*. |
-| MYSQL_USER_PASSWD | 12345678          | MySQL user password. Not needed most of the time. |
-| ADMIN_EMAIL       | admin@example.org | Email of the admin account.    |
-| ADMIN_PASSWORD    | ***************** | Password of the admin account. |
-| SSL               | 1                 | Whether to use SSL (0/1). **Set this twice**\*.     |
-
-\* This variable has to be set to the same value in two places inside the `docker-compose.yml`.
+3. Note the instructions and hints inside the `.env` and adapt everything to your needs (The least thing you probably want to do is change the server name). Afterwards, save the file.
 
 ### Using a different MySQL database
 
@@ -91,27 +80,36 @@ However, if you already have a mysql database in place, it may make more sense t
 
 In that case,
 
-1. comment out or delete the `mysql`-section inside the `docker-compose.yml`.
+1. comment out or delete the `db`-section inside the `docker-compose.yml`.
   ```yaml
   services:
       ...
-  #    mysql:
+  #    db:
   #        build:
-  #            context: mysql
+  #            context: db
   #        restart: always
   #        image: jojo243/mysql
-  #        container_name: seafile_mysql
+  #        container_name: seafile_db
   #        volumes:
-  #          - ./mysql/data:/var/lib/mysql
-  #        environment:
-  #          # Adapt according to your needs -------->
-  #          - "MYSQL_ROOT_PASSWORD=pleaseinsertareasonablepassword" # should be same as above
-  #          # <--------
-          ...
+  #          - ./db/data:/var/lib/mysql
+  #        env_file: .env
+      ...
   ```
-2. Configure `MYSQL_HOST`/`MYSQL_PORT` in the `seafile`-section to reflect the location of the MySQL database.
+2. Also comment out or delete the `depends_on` field from the seafile section:
+  ```yaml
+  services:
+    ...
+    seafile:
+        build:
+            context: seafile
+        restart: always
+        ...
+        # depends_on:
+        #    - db
+  ```
+3. Configure `MYSQL_HOST`/`MYSQL_PORT`/`MYSQL_USER`/`MYSQL_PASSWORD`/`MYSQL_ROOT_PASSWORD` in the `.env`-file to reflect the location of the MySQL database.
 
-    **Note**: The hostname must be accessible *from within the seafile docker container*. That means, if you specify `localhost` here, the database won't be accessible and an error will be thrown during the installation process. Specify either the IP address of the host or make sure the database is accessible from within the container otherwise. E.g., if the database is running inside another docker container, create a `docker network` and add both the `seafile`-container and the mysql container to that.
+    **Note**: The `MYSQL_HOST` must be accessible *from within the seafile docker container*. That means, if you specify `localhost` here, the database won't be accessible and an error will be thrown during the installation process. Specify either the IP address of the host or make sure the database is accessible from within the container otherwise. E.g., if the database is running inside another docker container, create a `docker network` and add both the `seafile`-container and the mysql container to that.
 
 ### SSL Configuration
 
@@ -142,8 +140,7 @@ should do the trick for the last one:
 
 ## Building
 
-Make sure you adapted everything inside the `docker-compose.yml` according to
-your needs. Now build the whole thing (this may take a while):
+Make sure you adapted everything inside the `.env` following the instructions above (See [Configuration](#Configuration)). Now build the whole thing (this may take a while):
 
 ```bash
 make 1

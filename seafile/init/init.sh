@@ -11,7 +11,16 @@ else
     cd seafile-server
 
     # Init mysql databases
-    ./setup-seafile-mysql.sh auto -n seafile -i ${SERVER_NAME}:${PORT} -d /data/seafile-data/ -o ${MYSQL_HOST} -t ${MYSQL_PORT} -u seafile -q %
+    ./setup-seafile-mysql.sh auto \
+      --server-name seafile \
+      --server-ip ${SERVER_NAME}:${PORT} \
+      --seafile-dir /data/seafile-data/ \
+      --mysql-host ${MYSQL_HOST} \
+      --mysql-port ${MYSQL_PORT} \
+      --mysql-user ${MYSQL_USER} \
+      --mysql-user-passwd ${MYSQL_PASSWORD} \
+      --mysql-user-host % \
+      --mysql-root-passwd ${MYSQL_ROOT_PASSWORD}
     cd ..
     sed -i "s|thirdpart/gunicorn|thirdpart/gunicorn/app/wsgiapp.py|" seafile-server/seahub.sh
 
