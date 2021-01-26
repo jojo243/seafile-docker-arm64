@@ -65,7 +65,7 @@ cd seafile-docker-arm64
 1. Take a look at the `.env.example`. Most of the configuration
 is done there.
 
-2. Copy that file or rename it to `.env`. The `docker-compose.yml` looks for that file.
+2. Copy that file or rename it to `.env` (That's the file the `docker-compose.yml` is looking for).
   ```bash
 cp .env.example .env
 ```
@@ -74,7 +74,7 @@ cp .env.example .env
 
 ### Using a different MySQL database
 
-The idea behind this project is to have Seafile set up as simple as possible. Therefore, the most straightforward option is taken here, which is to ship the application database with Seafile and run it in a container.
+The idea behind this project is to have Seafile set up as simple as possible. Therefore, the most straightforward option is taken here, which is to ship the application database with Seafile and run it in another container alongside seafile.
 
 However, if you already have a mysql database in place, it may make more sense to use that instance for seafile.
 

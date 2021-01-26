@@ -5,7 +5,7 @@ services:
             context: build
             args:
               - "SERVER_VERSION=${SERVER_VERSION}"
-        image: jojo243/seafile-base
+        image: jojo243/seafile-base:${SERVER_VERSION}
         container_name: seafile_base
         volumes:
             - ./build/src:/haiwen
@@ -13,7 +13,7 @@ services:
         build:
             context: seafile
         restart: always
-        image: jojo243/seafile
+        image: jojo243/seafile:${SERVER_VERSION}
         container_name: seafile_seafile
         volumes:
             - ./build/src/:/usr/src/
