@@ -26,6 +26,7 @@ services:
             # Adapt according to your needs -------->
             - "SERVER_NAME=www.example.org" # May also be localhost or an IP Address, must match SERVER_NAME below
             - "PORT=8080" # must match PORT below
+            - "MYSQL_HOST=mysql" # normally, this is fine, change only if you're using a different mysql database
             - "MYSQL_ROOT_PASSWD=pleaseinsertareasonablepassword" # should be same as below
             - "MYSQL_USER_PASSWD=12345678" # not needed most of the time
             - "ADMIN_EMAIL=admin@example.org" # email of the admin account
