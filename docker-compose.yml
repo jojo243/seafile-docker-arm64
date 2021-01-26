@@ -1,4 +1,4 @@
-version: '2'
+version: "3.7"
 services:
     baseimage:
         build:
@@ -10,9 +10,9 @@ services:
         volumes:
             - ./build/src:/haiwen
     seafile:
+        restart: always
         build:
             context: seafile
-        restart: always
         image: jojo243/seafile:${SERVER_VERSION}
         container_name: seafile_seafile
         volumes:
@@ -23,11 +23,11 @@ services:
             - db
         env_file: .env
         environment:
-            - "LC_ALL=C"
+            LC_ALL: C
 
     nginx:
         restart: always
-        image: arm64v8/nginx
+        image: arm64v8/nginx:alpine
         container_name: seafile_nginx
         volumes:
             - ./nginx/init/:/init/
@@ -37,16 +37,18 @@ services:
         entrypoint: /init/init.sh
         command: ["nginx", "-g", "daemon off;"]
         ports:
-            - ${PORT}:8080
+            - ${PORT}:${PORT}
         env_file: .env
         depends_on:
             - seafile
     db:
+        restart: always
         build:
             context: db
-        restart: always
-        image: jojo243/mysql
+            args:
+              - MYSQL_VERSION=${MYSQL_VERSION}
+        image: jojo243/mysql:${MYSQL_VERSION}
         container_name: seafile_db
         volumes:
-            - ./db/data:/var/lib/mysql
+            - ./db/data:/db/mysql
         env_file: .env

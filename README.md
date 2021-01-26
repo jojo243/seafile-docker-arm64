@@ -28,7 +28,7 @@ We use three main docker images to separate the different components from each o
 - *Recommended*: >= **30 GB of disk space** per user
 
 **Note**: *If your Hardware doesn't have enough RAM, you won't be able to
-build seafile and thus cannot enjoy the latest version. Don't worry, it will work anyway. The procdure is described [below](#Low-RAM).*
+build seafile and thus cannot enjoy the latest version. Don't worry, it will work anyway. The procedure is described [below](#Low-RAM).*
 
 Specifically, this setup has been tested on:
 

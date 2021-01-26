@@ -1,6 +1,6 @@
 MAKEFLAGS += --silent
 
-CLEANDIRS=mysql/data seafile/haiwen seafile/seafile build/src
+CLEANDIRS=db/data seafile/haiwen seafile/seafile build/src
 
 default: daemon
 
