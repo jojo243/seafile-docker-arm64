@@ -4,7 +4,7 @@
 sleep 20
 
 if [[ -d "seafile-server-latest" ]]; then
-    true
+    echo "Seafile directory already exists, skipping creation..."
 else
     # Copy the source
     cp -r /usr/src/seafile-server .

@@ -2,21 +2,22 @@ version: "3.7"
 services:
     baseimage:
         build:
-            context: build
+            context: seafile
+            target: build
             args:
-              - "SERVER_VERSION=${SERVER_VERSION}"
+              - SERVER_VERSION=${SERVER_VERSION}
         image: jojo243/seafile-base:${SERVER_VERSION}
         container_name: seafile_base
-        volumes:
-            - ./build/src:/haiwen
+        env_file: .env
+
     seafile:
         restart: always
         build:
             context: seafile
+            target: prod
         image: jojo243/seafile:${SERVER_VERSION}
         container_name: seafile_seafile
         volumes:
-            - ./build/src/:/usr/src/
             - ./seafile/haiwen:/haiwen/
             - ./seafile/seafile/:/data/
         depends_on:

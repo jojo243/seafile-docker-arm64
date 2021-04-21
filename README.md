@@ -203,33 +203,11 @@ make down
 
 ## Low RAM
 
-You will have to rely on the [official seafile builds for Raspberry Pi](https://github.com/haiwen/seafile-rpi). Just grab the latest release, uncompress it and place it inside `build/src`:
+You will have to rely on the [official seafile builds for Raspberry Pi](https://github.com/haiwen/seafile-rpi).
+Just set the `BUILD_METHOD` inside your `.env`-file to `pull`.
 
 ```bash
-SERVER_VERSION=6.3.4
-wget https://github.com/haiwen/seafile-rpi/releases/download/v${SERVER_VERSION}/seafile-server_${SERVER_VERSION}_stable_pi.tar.gz
-tar -xzf seafile-server_*.tar.gz
-rm seafile-server_*.tar.gz
-mv seafile-server* build/src/seafile-server
-```
-
-Additionally, you will have to comment out the whole `baseimage` target inside `docker-compose.yml`:
-
-```yaml
-services:
-#    baseimage:
-#        build:
-#            context: build
-#            args:
-#              - "SERVER_VERSION=7.0.0"
-#        image: jojo243/seafile-base
-#        container_name: seafile_base
-#        volumes:
-#            - ./build/src:/haiwen
-    seafile:
-        build:
-            ...
-        ...
+BUILD_METHOD=pull
 ```
 
 ## Troubleshooting

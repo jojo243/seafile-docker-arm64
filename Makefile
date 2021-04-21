@@ -12,7 +12,6 @@ default: daemon
 build:
 	docker-compose build
 
-
 #2.START
 2: up
 
