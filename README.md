@@ -72,17 +72,17 @@ cp .env.example .env
 
 3. Note the instructions and hints inside the `.env` and adapt everything to your needs (The least thing you probably want to do is change the server name). Afterwards, save the file.
 
-### <i class="fas fa-exclamation-triangle"></i> !!Notice!! <i class="fas fa-exclamation-triangle"></i>
+###  !!Notice!! 
 
-Previously, the configuration for this project was done in the `docker-compose.yml`. Using the `.env`-file, the configuration gets much easier and you wont have to update variables in two places. If you want to switch to the new method, you are likely some commits behind the master branch. In that case, just rename your `docker-compose.yml` to say `configuration.old`. Afterwards you just `git pull` and update the repo to the latest commit. Then you just follow the instructions to do the [configuration](#Configuration), incorporating your old config from `configuration.old` into `.env`.
+Previously, the configuration for this project was done in the `docker-compose.yml`. Using the `.env`-file, the configuration gets much easier and you wont have to update variables in two places. If you want to switch to the new method, you are likely some commits behind the master branch. In that case, just rename your `docker-compose.yml` to say `configuration.old`. Afterwards, `git pull` and update the repo to the latest commit. Then you just follow the instructions to do the [configuration](#Configuration), incorporating your old config from `configuration.old` into `.env`.
 
 ### Build Method
 
-You can either compile the whole seafile server yourself, using `BUILD_METHOD=build` in your `.env` file. Note that this may take ~1h (~30 min. needed for compilation of lxml). However, can can in theory enjoy the latest version of seafile, even if there is no official ARM-version now. Also, the resulting docker image will be only about ~300 MB in size, because we can use alpine as a base image.
+You can either compile the whole seafile server yourself, using `BUILD_METHOD=build` in your `.env` file, or pull a precompiled version from the official Github repo. Note that building seafile may take ~1h (~30 min. needed for compilation of lxml). However, can can in theory enjoy the latest version of seafile, even if there is no official ARM-version now. Also, the resulting docker image will be only about ~300 MB in size, because we can use alpine as a base image.
 
-If you wan't to avoid waiting that long you can also use `BUILD_METHOD=pull` (see [below](#Low-RAM)). In that case, the seafile sources will be downloaded from the official Github repo for [Seafile on Raspberry Pi](https://github.com/haiwen/seafile-rpi) and not compiled on your hardware. This will not take as long, also you don't need as much RAM. The resulting docker image will be ~1 GB in size.
+If you want to avoid waiting that long, you can also use `BUILD_METHOD=pull` (see also [below](#Low-RAM)). In that case, a precompiled seafile server will be downloaded from the official Github repo ([Seafile on Raspberry Pi](https://github.com/haiwen/seafile-rpi)) and you don't need to compile seafile on your hardware. This will not take as long, also you don't need as much RAM. The resulting docker image will be ~1 GB in size.
 
-<i class="fas fa-exclamation-triangle"></i> **Notice**: If you have your project up and running with either build or pull method, you can't switch to the other one, unless you know what you are doing! At the very least, you would have to back up your data, then rename your `seafile/haiwen` folder to say `seafile/haiwen-old/` and after the switch, move your old config (`seafile/haiwen-old/ccnet`, `seafile/haiwen-old/conf`, etc.) back to the new `seafile/haiwen` folder. Also, you would have to create a `seafile/haiwen/seafile-server-latest` symlink to `seafile/haiwen/seafile-server` yourself.
+ **Notice**: If you have your project up and running with either build or pull method, you can't switch to the other one, unless you know what you are doing! At the very least, you would have to back up your data, then rename your `seafile/haiwen` folder to say `seafile/haiwen-old/` and after the switch, move your old config (`seafile/haiwen-old/ccnet`, `seafile/haiwen-old/conf`, etc.) back to the new `seafile/haiwen` folder. Also, you would have to create a `seafile/haiwen/seafile-server-latest` symlink to `seafile/haiwen/seafile-server` yourself.
 
 ### Using a different MySQL database
 
