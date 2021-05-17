@@ -72,7 +72,7 @@ cp .env.example .env
 
 3. Note the instructions and hints inside the `.env` and adapt everything to your needs (The least thing you probably want to do is change the server name). Afterwards, save the file.
 
-###  !!Notice!! 
+### :warning: !!Notice!! :warning:
 
 Previously, the configuration for this project was done in the `docker-compose.yml`. Using the `.env`-file, the configuration gets much easier and you wont have to update variables in two places. If you want to switch to the new method, you are likely some commits behind the master branch. In that case, just rename your `docker-compose.yml` to say `configuration.old`. Afterwards, `git pull` and update the repo to the latest commit. Then you just follow the instructions to do the [configuration](#Configuration), incorporating your old config from `configuration.old` into `.env`.
 
@@ -82,7 +82,7 @@ You can either compile the whole seafile server yourself, using `BUILD_METHOD=bu
 
 If you want to avoid waiting that long, you can also use `BUILD_METHOD=pull` (see also [below](#Low-RAM)). In that case, a precompiled seafile server will be downloaded from the official Github repo ([Seafile on Raspberry Pi](https://github.com/haiwen/seafile-rpi)) and you don't need to compile seafile on your hardware. This will not take as long, also you don't need as much RAM. The resulting docker image will be ~1 GB in size.
 
- **Notice**: If you have your project up and running with either build or pull method, you can't switch to the other one, unless you know what you are doing! At the very least, you would have to back up your data, then rename your `seafile/haiwen` folder to say `seafile/haiwen-old/` and after the switch, move your old config (`seafile/haiwen-old/ccnet`, `seafile/haiwen-old/conf`, etc.) back to the new `seafile/haiwen` folder. Also, you would have to create a `seafile/haiwen/seafile-server-latest` symlink to `seafile/haiwen/seafile-server` yourself.
+:warning: **Notice**: If you have your project up and running with either build or pull method, you can't switch to the other one, unless you know what you are doing! At the very least, you would have to back up your data, then rename your `seafile/haiwen` folder to say `seafile/haiwen-old/` and after the switch, move your old config (`seafile/haiwen-old/ccnet`, `seafile/haiwen-old/conf`, etc.) back to the new `seafile/haiwen` folder. Also, you would have to create a `seafile/haiwen/seafile-server-latest` symlink to `seafile/haiwen/seafile-server` yourself.
 
 ### Using a different MySQL database
 
