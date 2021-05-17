@@ -4,7 +4,7 @@ CLEANDIRS=db/data seafile/haiwen seafile/seafile
 
 default: daemon
 
-.PHONY: 1 2 3 4 5 6 build up daemon start down stop clean backup backup-ssl restore
+.PHONY: 1 2 3 4 5 6 build up daemon start down stop clean upgrade backup backup-ssl restore
 
 #1.BUILD
 1: build
@@ -23,6 +23,13 @@ daemon:
 
 start:
 	docker-compose start
+
+#21.UPGRADE
+21: upgrade
+
+upgrade:
+	docker-compose run seafile upgrade
+	docker-compose down
 
 #3.STOP
 3: down

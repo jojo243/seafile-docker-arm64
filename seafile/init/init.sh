@@ -17,8 +17,35 @@ if __name__ == '__main__':
 EOF
 }
 
+minor_upgrade() {
+    ./minor-upgrade.sh <<EOF
+dummy
+EOF
+}
+
+fix_permissions() {
+    chown -R seafile:seafile /haiwen/ || return 1
+    chown -R seafile:seafile /data/
+}
+
+do_upgrade() {
+    echo "Upgrading Seafile folder, please wait..."
+    rm -r seafile-server || return 1
+    cp -r /usr/src/seafile-server . || return 1
+    cd seafile-server/upgrade || return 1
+    minor_upgrade || return 1
+    create_gunicorn || return 1
+    fix_permissions || return 1
+    echo "Upgrade done, now start Seafile with 'make' or 'make 2'"
+}
+
 if [[ -d "seafile-server-latest" ]]; then
-    echo "Seafile directory already exists, skipping creation..."
+    if [[ -n "$1" && "$1" = "upgrade" ]]; then
+        do_upgrade || echo "Upgrade failed."
+        exit 0
+    else
+        echo "Seafile directory already exists, skipping creation..."
+    fi
 else
     # Copy the source
     cp -r /usr/src/seafile-server .
@@ -90,8 +117,7 @@ EOF
     # create symlinks in /usr/local/bin
     # for i in `ls /haiwen/seafile-server-latest/seafile/bin`; do ln -s /haiwen/seafile-server-latest/seafile/bin/$i /usr/local/bin/$i; done
 
-    chown -R seafile:seafile /data/seafile-data
-    chown -R seafile:seafile /haiwen
+    fix_permissions
     ln -s /data/seafile-data seafile-data
 fi
 
