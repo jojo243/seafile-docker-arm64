@@ -1,11 +1,14 @@
 version: "3.7"
+x-buildargs: &buildargs
+    SERVER_VERSION: ${SERVER_VERSION}
+    BUILD_METHOD: ${BUILD_METHOD}
+
 services:
     baseimage:
         build:
             context: seafile
-            target: build
-            args:
-              - SERVER_VERSION=${SERVER_VERSION}
+            target: ${BUILD_METHOD}
+            args: *buildargs
         image: jojo243/seafile-base:${SERVER_VERSION}
         container_name: seafile_base
         env_file: .env
@@ -15,6 +18,7 @@ services:
         build:
             context: seafile
             target: prod
+            args: *buildargs
         image: jojo243/seafile:${SERVER_VERSION}
         container_name: seafile_seafile
         volumes:
@@ -51,5 +55,5 @@ services:
         image: jojo243/mysql:${MYSQL_VERSION}
         container_name: seafile_db
         volumes:
-            - ./db/data:/db/mysql
+            - ./db/data:/db
         env_file: .env
