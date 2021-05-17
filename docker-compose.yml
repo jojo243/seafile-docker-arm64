@@ -1,42 +1,38 @@
-version: '2'
+version: "3.7"
+x-buildargs: &buildargs
+    SERVER_VERSION: ${SERVER_VERSION}
+    BUILD_METHOD: ${BUILD_METHOD}
+
 services:
     baseimage:
         build:
-            context: build
-            args:
-              - "SERVER_VERSION=7.0.0"
-        image: jojo243/seafile-base
+            context: seafile
+            target: ${BUILD_METHOD}
+            args: *buildargs
+        image: jojo243/seafile-base:${SERVER_VERSION}
         container_name: seafile_base
-        volumes:
-            - ./build/src:/haiwen
+        env_file: .env
+
     seafile:
+        restart: always
         build:
             context: seafile
-        restart: always
-        image: jojo243/seafile
+            target: prod
+            args: *buildargs
+        image: jojo243/seafile:${SERVER_VERSION}
         container_name: seafile_seafile
         volumes:
-            - ./build/src/:/usr/src/
             - ./seafile/haiwen:/haiwen/
             - ./seafile/seafile/:/data/
         depends_on:
-            - mysql
+            - db
+        env_file: .env
         environment:
-            - "LC_ALL=C"
-            # Adapt according to your needs -------->
-            - "SERVER_NAME=www.example.org" # May also be localhost or an IP Address, must match SERVER_NAME below
-            - "PORT=8080" # must match PORT below
-            - "MYSQL_HOST=mysql" # normally, this is fine, change only if you're using a different mysql database
-            - "MYSQL_PORT=3306" # normally, this is fine, change only if you're using a different mysql database
-            - "MYSQL_ROOT_PASSWD=pleaseinsertareasonablepassword" # should be same as below
-            - "MYSQL_USER_PASSWD=12345678" # not needed most of the time
-            - "ADMIN_EMAIL=admin@example.org" # email of the admin account
-            - "ADMIN_PASSWORD=changethissoon"
-            - "SSL=1" # SSL=1: Use SSl; SSL=0: Don't use SSL
-            # <--------
+            LC_ALL: C
+
     nginx:
         restart: always
-        image: arm64v8/nginx
+        image: arm64v8/nginx:alpine
         container_name: seafile_nginx
         volumes:
             - ./nginx/init/:/init/
@@ -46,27 +42,18 @@ services:
         entrypoint: /init/init.sh
         command: ["nginx", "-g", "daemon off;"]
         ports:
-            # Adapt according to your needs
-            - 8080:8080
-            # outer:inner, outer = port where seafile can be accessed from outside, must match SERVER_NAME (above)
-            #              inner = port where nginx listens internally
-        environment:
-            # Adapt according to your needs -------->
-            - "SERVER_NAME=www.example.org" # May also be localhost or an IP Address, must match SERVER_NAME above
-            - "PORT=8080" # Must be the same as the "inner" port above, and must match PORT above
-            - "SSL=1" # SSL=1: Use SSl; SSL=0: Don't use SSL
-            # <--------
+            - ${PORT}:${PORT}
+        env_file: .env
         depends_on:
             - seafile
-    mysql:
-        build:
-            context: mysql
+    db:
         restart: always
-        image: jojo243/mysql
-        container_name: seafile_mysql
+        build:
+            context: db
+            args:
+              - MYSQL_VERSION=${MYSQL_VERSION}
+        image: jojo243/mysql:${MYSQL_VERSION}
+        container_name: seafile_db
         volumes:
-            - ./mysql/data:/var/lib/mysql
-        environment:
-            # Adapt according to your needs -------->
-            - "MYSQL_ROOT_PASSWORD=pleaseinsertareasonablepassword" # should be same as above
-            # <--------
+            - ./db/data:/db
+        env_file: .env

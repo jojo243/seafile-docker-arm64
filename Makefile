@@ -1,6 +1,6 @@
 MAKEFLAGS += --silent
 
-CLEANDIRS=mysql/data seafile/haiwen seafile/seafile build/src
+CLEANDIRS=db/data seafile/haiwen seafile/seafile
 
 default: daemon
 
@@ -10,8 +10,7 @@ default: daemon
 1: build
 
 build:
-	docker-compose build
-
+	docker-compose --env-file .env build
 
 #2.START
 2: up

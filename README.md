@@ -28,7 +28,7 @@ We use three main docker images to separate the different components from each o
 - *Recommended*: >= **30 GB of disk space** per user
 
 **Note**: *If your Hardware doesn't have enough RAM, you won't be able to
-build seafile and thus cannot enjoy the latest version. Don't worry, it will work anyway. The procdure is described [below](#Low-RAM).*
+build seafile and thus cannot enjoy the latest version. Don't worry, it will work anyway. The procedure is described [below](#Low-RAM).*
 
 Specifically, this setup has been tested on:
 
@@ -62,56 +62,68 @@ cd seafile-docker-arm64
 
 ## Configuration
 
-Make yourself familiar with the `docker-compose.yml`. Most of the configuration
-is done there. Note the instructions and hints inside the `docker-compose.yml`
-and adapt everything to your needs (The least thing you probably want to do is
-change the server name).
+1. Take a look at the `.env.example`. Most of the configuration
+is done there.
 
-See the table below for detailed instrucions.
+2. Copy that file or rename it to `.env` (That's the file the `docker-compose.yml` is looking for).
+  ```bash
+cp .env.example .env
+```
 
-| Variable Name     | Example           | Description                    |
-| ----------------- | ----------------- | ------------------------------ |
-| SERVER_NAME       | www.example.org   | IP Address or hostname where the server can be accessed. **Set this twice**\*. |
-| PORT              | 8080              | Port where the server can be accessed. **Set this twice**\*. |
-| MYSQL_HOST        | mysql             | MySQL host; do not change unless you're using a different mysql database |
-| MYSQL_PORT        | 3306              | MySQL port; do not change unless you're using a different mysql database |
-| MYSQL_ROOT_PASSWD | ***************** | MySQL root password. **Set this twice**\*. |
-| MYSQL_USER_PASSWD | 12345678          | MySQL user password. Not needed most of the time. |
-| ADMIN_EMAIL       | admin@example.org | Email of the admin account.    |
-| ADMIN_PASSWORD    | ***************** | Password of the admin account. |
-| SSL               | 1                 | Whether to use SSL (0/1). **Set this twice**\*.     |
+3. Note the instructions and hints inside the `.env` and adapt everything to your needs (The least thing you probably want to do is change the server name). Afterwards, save the file.
 
-\* This variable has to be set to the same value in two places inside the `docker-compose.yml`.
+### :warning: !!Notice!! :warning:
+
+Previously, the configuration for this project was done in the `docker-compose.yml`. Using the `.env`-file, the configuration gets much easier and you wont have to update variables in two places. If you want to switch to the new method, you are likely some commits behind the master branch. In that case, just rename your `docker-compose.yml` to say `configuration.old`. Afterwards, `git pull` and update the repo to the latest commit. Then you just follow the instructions to do the [configuration](#Configuration), incorporating your old config from `configuration.old` into `.env`.
+
+### Build Method
+
+You can either compile the whole seafile server yourself, using `BUILD_METHOD=build` in your `.env` file, or pull a precompiled version from the official Github repo. Note that building seafile may take ~1h (~30 min. needed for compilation of lxml). However, can can in theory enjoy the latest version of seafile, even if there is no official ARM-version now. Also, the resulting docker image will be only about ~300 MB in size, because we can use alpine as a base image.
+
+If you want to avoid waiting that long, you can also use `BUILD_METHOD=pull` (see also [below](#Low-RAM)). In that case, a precompiled seafile server will be downloaded from the official Github repo ([Seafile on Raspberry Pi](https://github.com/haiwen/seafile-rpi)) and you don't need to compile seafile on your hardware. This will not take as long, also you don't need as much RAM. The resulting docker image will be ~1 GB in size.
+
+:warning: **Notice**: If you have your project up and running with either build or pull method, you can't switch to the other one, unless you know what you are doing! At the very least, you would have to back up your data, then rename your `seafile/haiwen` folder to say `seafile/haiwen-old/` and after the switch, move your old config (`seafile/haiwen-old/ccnet`, `seafile/haiwen-old/conf`, etc.) back to the new `seafile/haiwen` folder. Also, you would have to create a `seafile/haiwen/seafile-server-latest` symlink to `seafile/haiwen/seafile-server` yourself.
 
 ### Using a different MySQL database
 
-The idea behind this project is to have Seafile set up as simple as possible. Therefore, the most straightforward option is taken here, which is to ship the application database with Seafile and run it in a container.
+The idea behind this project is to have Seafile set up as simple as possible. Therefore, the most straightforward option is taken here, which is to ship the application database with Seafile and run it in another container alongside seafile.
 
 However, if you already have a mysql database in place, it may make more sense to use that instance for seafile.
 
 In that case,
 
-1. comment out or delete the `mysql`-section inside the `docker-compose.yml`.
+1. comment out or delete the `db`-section inside the `docker-compose.yml`.
   ```yaml
   services:
       ...
-  #    mysql:
-  #        build:
-  #            context: mysql
+  #    db:
   #        restart: always
-  #        image: jojo243/mysql
-  #        container_name: seafile_mysql
+  #        build:
+  #            context: db
+  #            args:
+  #              - MYSQL_VERSION=${MYSQL_VERSION}
+  #        image: jojo243/mysql:${MYSQL_VERSION}
+  #        container_name: seafile_db
   #        volumes:
-  #          - ./mysql/data:/var/lib/mysql
-  #        environment:
-  #          # Adapt according to your needs -------->
-  #          - "MYSQL_ROOT_PASSWORD=pleaseinsertareasonablepassword" # should be same as above
-  #          # <--------
-          ...
+  #          - ./db/data:/db/mysql
+  #        env_file: .env
+      ...
   ```
-2. Configure `MYSQL_HOST`/`MYSQL_PORT` in the `seafile`-section to reflect the location of the MySQL database.
+2. Also comment out or delete the `depends_on` field from the seafile section:
+  ```yaml
+  services:
+    ...
+    seafile:
+        build:
+            context: seafile
+        restart: always
+        ...
+        # depends_on:
+        #    - db
+  ```
+3. Configure `MYSQL_HOST`/`MYSQL_PORT`/`MYSQL_USER`/`MYSQL_PASSWORD`/`MYSQL_ROOT_PASSWORD` in the `.env`-file to reflect the location of the MySQL database.
 
-    **Note**: The hostname must be accessible *from within the seafile docker container*. That means, if you specify `localhost` here, the database won't be accessible and an error will be thrown during the installation process. Specify either the IP address of the host or make sure the database is accessible from within the container otherwise. E.g., if the database is running inside another docker container, create a `docker network` and add both the `seafile`-container and the mysql container to that.
+    **Note**: The `MYSQL_HOST` must be accessible *from within the seafile docker container*. That means, if you specify `localhost` here, the database won't be accessible and an error will be thrown during the installation process. Specify either the IP address of the host or make sure the database is accessible from within the container otherwise. E.g., if the database is running inside another docker container, create a `docker network` and add both the `seafile`-container and the mysql container to that.
 
 ### SSL Configuration
 
@@ -142,8 +154,7 @@ should do the trick for the last one:
 
 ## Building
 
-Make sure you adapted everything inside the `docker-compose.yml` according to
-your needs. Now build the whole thing (this may take a while):
+Make sure you adapted everything inside the `.env` following the instructions above (See [Configuration](#Configuration)). Now build the whole thing (this can take up to an hour):
 
 ```bash
 make 1
@@ -204,33 +215,12 @@ make down
 
 ## Low RAM
 
-You will have to rely on the [official seafile builds for Raspberry Pi](https://github.com/haiwen/seafile-rpi). Just grab the latest release, uncompress it and place it inside `build/src`:
+You will have to rely on the [official seafile builds for Raspberry Pi](https://github.com/haiwen/seafile-rpi).
+Just set the `BUILD_METHOD` inside your `.env`-file to `pull`.
 
 ```bash
-SERVER_VERSION=6.3.4
-wget https://github.com/haiwen/seafile-rpi/releases/download/v${SERVER_VERSION}/seafile-server_${SERVER_VERSION}_stable_pi.tar.gz
-tar -xzf seafile-server_*.tar.gz
-rm seafile-server_*.tar.gz
-mv seafile-server* build/src/seafile-server
-```
-
-Additionally, you will have to comment out the whole `baseimage` target inside `docker-compose.yml`:
-
-```yaml
-services:
-#    baseimage:
-#        build:
-#            context: build
-#            args:
-#              - "SERVER_VERSION=7.0.0"
-#        image: jojo243/seafile-base
-#        container_name: seafile_base
-#        volumes:
-#            - ./build/src:/haiwen
-    seafile:
-        build:
-            ...
-        ...
+~~BUILD_METHOD=build~~
+BUILD_METHOD=pull
 ```
 
 ## Troubleshooting
@@ -249,3 +239,13 @@ services:
     make down
     make
     ```
+
+- `Page unavailable / server hiccup`
+
+    This means seahub has thrown some exception. Look it up inside `seafile/haiwen/logs/seahub.log`.
+    Also, set Djangos `DEBUG = True` inside `seahub-settings.py`.
+
+- `Error: Seahub failed to start.`
+
+    This is some gunicorn error. Try setting `daemon = False` in `conf/gunicorn.conf` to get more info.
+

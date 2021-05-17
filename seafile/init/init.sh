@@ -1,19 +1,42 @@
 #!/bin/bash
 
 # Wait for mysql to start up...
-sleep 20
+sleep 10
+
+create_gunicorn() {
+	mkdir -p /haiwen/seafile-server-latest/seahub/thirdpart/bin
+	cat <<EOF > /haiwen/seafile-server-latest/seahub/thirdpart/bin/gunicorn
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+import re
+import sys
+from gunicorn.app.wsgiapp import run
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(run())
+EOF
+}
 
 if [[ -d "seafile-server-latest" ]]; then
-    true
+    echo "Seafile directory already exists, skipping creation..."
 else
     # Copy the source
     cp -r /usr/src/seafile-server .
     cd seafile-server
 
     # Init mysql databases
-    ./setup-seafile-mysql.sh auto -n seafile -i ${SERVER_NAME}:${PORT} -d /data/seafile-data/ -o ${MYSQL_HOST} -t ${MYSQL_PORT} -u seafile -q %
+    ./setup-seafile-mysql.sh auto \
+      --server-name seafile \
+      --server-ip ${SERVER_NAME}:${PORT} \
+      --seafile-dir /data/seafile-data/ \
+      --mysql-host ${MYSQL_HOST} \
+      --mysql-port ${MYSQL_PORT} \
+      --mysql-user ${MYSQL_USER} \
+      --mysql-user-passwd ${MYSQL_PASSWORD} \
+      --mysql-user-host % \
+      --mysql-root-passwd ${MYSQL_ROOT_PASSWORD}
     cd ..
-    sed -i "s|thirdpart/gunicorn|thirdpart/gunicorn/app/wsgiapp.py|" seafile-server/seahub.sh
+    # sed -i "s|thirdpart/gunicorn|thirdpart/gunicorn/app/wsgiapp.py|" seafile-server/seahub.sh
 
     # admin.txt
     cat <<EOF > conf/admin.txt
@@ -30,8 +53,8 @@ EOF
 	    exit 1
     fi
 
-    # gunicorn.conf
-    sed -i "s/127.0.0.1/0.0.0.0/g" conf/gunicorn.conf
+    # gunicorn.conf.py
+    sed -i "s/127.0.0.1/0.0.0.0/g" conf/gunicorn.conf.py
 
     if [ ${SSL} -eq 1 ]; then
         SCHEME=https
@@ -48,13 +71,39 @@ EOF
     sed -i "/^SERVICE_URL/d" conf/ccnet.conf
     sed -i "${LINENUMBER}iSERVICE_URL = ${SCHEME}://${SERVER_NAME}:${PORT}" conf/ccnet.conf
 
-    chown -R 1000:1000 /haiwen
-    chown -R 1000:1000 /data
+    # seafdav.conf
+    # sed -i "s/enabled = false/enabled = true/" conf/seafdav.conf
+    # sed -i "s|share_name = /|share_name = /seafdav|" conf/seafdav.conf
+    # seafile.conf
+    #LINENUMBER=$(sed -n '/\[fileserver\]/=' conf/seafile.conf)
+    #echo "Linenumber1 = $LINENUMBER"
+    #if [ -z "${LINENUMBER}" ]; then
+    #	LINENUMBER=2
+    #else
+	#LINENUMBER=$(expr ${LINENUMBER} + 1)
+    #fi
+    #echo "Linenumber2 = $LINENUMBER"
+    #sed -i "${LINENUMBER}ihost = 127.0.0.1" conf/seafile.conf
+
+    # gunicorn
+    create_gunicorn
+    # create symlinks in /usr/local/bin
+    # for i in `ls /haiwen/seafile-server-latest/seafile/bin`; do ln -s /haiwen/seafile-server-latest/seafile/bin/$i /usr/local/bin/$i; done
+
+    chown -R seafile:seafile /data/seafile-data
+    chown -R seafile:seafile /haiwen
+    ln -s /data/seafile-data seafile-data
 fi
 
+# TODO: implement upgrade procedure somehow?
+# PYTHON=/usr/local/bin/python3 seafile-server/upgrade/upgrade_7.0_7.1.sh || exit 0
+
 cd seafile-server-latest
+# for i in `ls /haiwen/seafile-server-latest/seafile/bin`; do ln -s /haiwen/seafile-server-latest/seafile/bin/$i /usr/local/bin/$i; done
+# ls -la /usr/local/bin
 
 su -m seafile -c "./seafile.sh start"
+sleep 5
 su -m seafile -c "./seahub.sh start"
 
 exec "$@"

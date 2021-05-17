@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 cd /opt/conf/
 
 if [ $SSL -eq 1 ]; then
