@@ -1,25 +1,14 @@
+#syntax=docker/dockerfile:1.2
 ARG             BUILD_METHOD
 
 #--------------------------------------------------
-FROM            arm64v8/python:3.7-alpine as build
+FROM            arm64v8/python:3.7-alpine as build-stage-0
 
 ARG             GITHUB=https://github.com/
 ARG             REPO=haiwen
 ARG             BASEURL=${GITHUB}${REPO}/
 
-# Github URLs
-ARG             LIBEVHTP_URL=${BASEURL}libevhtp.git
-ARG             LIBSEARPC_URL=${BASEURL}libsearpc.git
-ARG             CCNET_SERVER_URL=${BASEURL}ccnet-server.git
-ARG             SEAFILE_SERVER_URL=${BASEURL}seafile-server.git
-ARG             SEAHUB_URL=${BASEURL}seahub.git
-ARG             SEAFOBJ_URL=${BASEURL}seafobj.git
-ARG             SEAFDAV_URL=${BASEURL}seafdav.git
-
 ARG             PREFIX_PATH=/usr/src
-ARG             PKG_CONFIG_PATH=${PREFIX_PATH}/dev/seafile-server/lib:$PKG_CONFIG_PATH
-ARG             PKG_CONFIG_PATH=${PREFIX_PATH}/dev/libsearpc:$PKG_CONFIG_PATH
-ARG             PKG_CONFIG_PATH=${PREFIX_PATH}/dev/ccnet-server:$PKG_CONFIG_PATH
 
 # Tags & Versions
 ARG             LIBSEARPC_VERSION=3.2
@@ -27,15 +16,17 @@ ARG             LIBSEARPC_TAG=v${LIBSEARPC_VERSION}-latest
 ARG             SERVER_VERSION
 ARG             SERVER_TAG=v${SERVER_VERSION}-server
 
+ARG             PKG_CONFIG_PATH=${PREFIX_PATH}/seafile-server/lib:$PKG_CONFIG_PATH
+ARG             PKG_CONFIG_PATH=${PREFIX_PATH}/libsearpc:$PKG_CONFIG_PATH
+ARG             PKG_CONFIG_PATH=${PREFIX_PATH}/ccnet-server:$PKG_CONFIG_PATH
+
 WORKDIR         ${PREFIX_PATH}
 
-COPY            requirements.txt .
+ENV             PATH=${PATH}:${PREFIX_PATH}/seahub-thirdpart/bin
+ENV             PYTHONPATH=${PREFIX_PATH}/seahub-thirdpart/bin
 
-ENV             PATH=${PATH}:${PREFIX_PATH}/dev/seahub_thirdpart/bin
-ENV             PYTHONPATH=${PREFIX_PATH}/dev/seahub_thirdpart/bin
-
-RUN             mkdir -p dev/seahub_thirdpart seafile-sources seafile-server-pkgs && \
-                    apk add --no-cache --virtual build-deps \
+RUN             --mount=type=cache,target=/var/cache/apk/ \
+                    apk add --virtual build-deps \
                         autoconf \
                         automake \
                         bash \
@@ -57,88 +48,115 @@ RUN             mkdir -p dev/seahub_thirdpart seafile-sources seafile-server-pkg
                         oniguruma-dev \
                         openssl-dev \
                         sqlite-dev \
-                        zlib-dev \
-                    && \
-                    cd dev && \
-# clone repos
-                    git clone ${LIBEVHTP_URL} && \
-                    git clone ${LIBSEARPC_URL} && \
-                    git clone ${CCNET_SERVER_URL} && \
-                    git clone ${SEAFILE_SERVER_URL} && \
-                    git clone ${SEAHUB_URL} && \
-                    git clone ${SEAFOBJ_URL} && \
-                    git clone ${SEAFDAV_URL} && \
-# libevhtp
-                    cd libevhtp && \
+                        zlib-dev
+
+# -------
+FROM            build-stage-0 as build-stage-1
+
+RUN             --mount=type=cache,target=/var/cache/apk/ \
+                    apk add --virtual build-deps-python \
+                        glib-dev \
+                        libevent-dev \
+                        vala
+
+# -------
+FROM            build-stage-0 as seahub-thirdpart
+
+RUN             --mount=target=./build,source=build \
+                --mount=type=cache,target=/root/.cache/pip \
+                    pip3 install --target=seahub-thirdpart -r build/requirements.txt
+
+# -------
+FROM            build-stage-0 as libevhtp
+
+RUN             git clone ${BASEURL}libevhtp.git && cd libevhtp && \
                     apk add --no-cache libevent-dev && \
                     cmake -DEVHTP_DISABLE_SSL=ON -DEVHTP_BUILD_SHARED=OFF . && \
                     make && make install && ldconfig /usr/local/lib && \
-                    apk del libevent-dev && \
-# seahub thirdpart
-                    cd ../seahub_thirdpart && \
-                    mv ../../requirements.txt . && \
-                    pip3 install --user -r requirements.txt && \
-                    mv ~/.local/* . && \
-# For whatever reason, the ac_init call of seafile, ccnet, etc. happens which "6.0.1" (3.1.0 for libsearpc), 
-# thus every corresponding entry in configure.ac must be found and replaced with ${*PACKAGE*_VERSION}.
-# `sed -i` does this.
-# libsearpc
-                    cd ../libsearpc && \
-                    apk add --no-cache --virtual build-deps-python \
-                        glib-dev \
-                        libevent-dev \
-                        vala && \
+                    apk del libevent-dev
+
+# -------
+FROM            build-stage-1 as libsearpc
+
+RUN             git clone ${BASEURL}libsearpc.git && cd libsearpc && \
                     git reset --hard ${LIBSEARPC_TAG} && \
                     sed -i "s/3.1.0/${LIBSEARPC_VERSION}/g" configure.ac && \
-                    ./autogen.sh && ./configure && make dist && \
-                    mv libsearpc-${LIBSEARPC_VERSION}.tar.gz ../../seafile-sources && \
-# ccnet
-                    cd ../ccnet-server && \
+                    ./autogen.sh && ./configure && make dist
+
+# -------
+FROM            libsearpc as ccnet
+
+RUN             git clone ${BASEURL}ccnet-server.git && cd ccnet-server && \
                     git reset --hard ${SERVER_TAG} && \
                     sed -i "s/6.0.1/${SERVER_VERSION}/g" configure.ac && \
                     sed -i "s/mysqlclient/mariadb/g" configure.ac && \
-                    ./autogen.sh && ./configure && make dist && \
-                    mv ccnet-${SERVER_VERSION}.tar.gz ../../seafile-sources && \
-# seafile-server
-                    cd ../seafile-server && \
+                    ./autogen.sh && ./configure && make dist
+
+# -------
+FROM            ccnet as seafile-server
+
+RUN             git clone ${BASEURL}seafile-server.git && cd seafile-server && \
                     git reset --hard ${SERVER_TAG} && \
                     sed -i "s/6.0.1/${SERVER_VERSION}/g" configure.ac && \
                     sed -i "s/mysqlclient/mariadb/g" configure.ac && \
-                    ./autogen.sh && ./configure && make dist && \
-                    mv seafile-${SERVER_VERSION}.tar.gz ../../seafile-sources && \
-                    apk del build-deps-python && \
-# seahub
-                    cd ../seahub && git reset --hard ${SERVER_TAG} && \
-                    python3 tools/gen-tarball.py --version=${SERVER_VERSION} --branch=HEAD && \
-                    mv seahub-${SERVER_VERSION}.tar.gz ../../seafile-sources/ && \
-# seaobj
-                    cd ../seafobj && git reset --hard ${SERVER_TAG} && make dist && \
-                    mv seafobj.tar.gz ../../seafile-sources && \
-# seafdav
-                    cd ../seafdav && git reset --hard ${SERVER_TAG} && make && \
-                    mv seafdav.tar.gz ../../seafile-sources && \
-# build server
-                    cd ../.. && \
+                    ./autogen.sh && ./configure && make dist
+
+# -------
+FROM            seahub-thirdpart as seahub
+
+RUN             git clone ${BASEURL}seahub.git && cd seahub && \
+                    git reset --hard ${SERVER_TAG} && \
+                    python3 tools/gen-tarball.py --version=${SERVER_VERSION} --branch=HEAD
+
+# -------
+FROM            build-stage-0 as seafobj
+
+RUN             git clone ${BASEURL}seafobj.git && cd seafobj && \
+                    git reset --hard ${SERVER_TAG} && make dist
+
+# -------
+FROM            build-stage-0 as seafdav
+
+RUN             git clone ${BASEURL}seafdav.git && cd seafdav && \
+                    git reset --hard ${SERVER_TAG} && make
+
+# -------
+FROM            libevhtp as build
+
+WORKDIR         ${PREFIX_PATH}
+
+COPY            --from=libsearpc ${PREFIX_PATH}/libsearpc/libsearpc-${LIBSEARPC_VERSION}.tar.gz seafile-sources/
+COPY            --from=ccnet ${PREFIX_PATH}/ccnet-server/ccnet-${SERVER_VERSION}.tar.gz seafile-sources/
+COPY            --from=seafile-server ${PREFIX_PATH}/seafile-server/seafile-${SERVER_VERSION}.tar.gz seafile-sources/
+COPY            --from=seafile-server ${PREFIX_PATH}/seafile-server/scripts/build/build-server.py build-server.py
+COPY            --from=seahub ${PREFIX_PATH}/seahub/seahub-${SERVER_VERSION}.tar.gz seafile-sources/
+COPY            --from=seahub-thirdpart ${PREFIX_PATH}/seahub-thirdpart seahub-thirdpart/
+COPY            --from=seafobj ${PREFIX_PATH}/seafobj/seafobj.tar.gz seafile-sources/
+COPY            --from=seafdav ${PREFIX_PATH}/seafdav/seafdav.tar.gz seafile-sources/
+
+RUN             mkdir seafile-server-pkgs && \
+                    ls -la seafile-sources && \
+                    ls -la seahub-thirdpart && \
                     apk add --no-cache --virtual build-deps-server \
                         glib-dev \
                         libevent-dev \
                     && \
-                    sed -i "s/--enable-ldap//g" dev/seafile-server/scripts/build/build-server.py && \
-                    python3 dev/seafile-server/scripts/build/build-server.py \
+                    sed -i "s/--enable-ldap//g" build-server.py && \
+                    python3 build-server.py \
                         --version=${SERVER_VERSION} \
                         --libsearpc_version=${LIBSEARPC_VERSION} \
                         --ccnet_version=${SERVER_VERSION} \
                         --seafile_version=${SERVER_VERSION} \
-                        --thirdpartdir=${PREFIX_PATH}/dev/seahub_thirdpart/lib/python3.7/site-packages/ \
+                        --thirdpartdir=${PREFIX_PATH}/seahub-thirdpart/ \
                         --srcdir=${PREFIX_PATH}/seafile-sources \
                         --outputdir=${PREFIX_PATH}/seafile-server-pkgs \
                         --yes && \
 # Clean Up
                     mv seafile-server-pkgs/* . && \
                     tar xzf seafile-server_*.tar.gz && \
-                    rm -r dev seafile-sources seafile-server-pkgs seafile-server_*.tar.gz /root/.cache/ root/.local && \
+                    rm -r seafile-server-pkgs seafile-server_*.tar.gz && \
                     mv seafile-server* seafile-server && \
-                    apk del build-deps build-deps-server && \
+                    apk del build-deps-server && \
                     cd /usr && find . -regex '^.*\(__pycache__\|\.py[co]\)$' -delete
 
 #--------------------------------------------------

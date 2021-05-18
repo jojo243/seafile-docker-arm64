@@ -1,24 +1,14 @@
 version: "3.7"
-x-buildargs: &buildargs
-    SERVER_VERSION: ${SERVER_VERSION}
-    BUILD_METHOD: ${BUILD_METHOD}
 
 services:
-    baseimage:
-        build:
-            context: seafile
-            target: ${BUILD_METHOD}
-            args: *buildargs
-        image: jojo243/seafile-base:${SERVER_VERSION}
-        container_name: seafile_base
-        env_file: .env
-
     seafile:
         restart: always
         build:
             context: seafile
             target: prod
-            args: *buildargs
+            args:
+                SERVER_VERSION: ${SERVER_VERSION}
+                BUILD_METHOD: ${BUILD_METHOD}
         image: jojo243/seafile:${SERVER_VERSION}
         container_name: seafile_seafile
         volumes:
