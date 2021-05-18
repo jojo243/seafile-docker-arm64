@@ -136,9 +136,10 @@ RUN             mkdir -p dev/seahub_thirdpart seafile-sources seafile-server-pkg
 # Clean Up
                     mv seafile-server-pkgs/* . && \
                     tar xzf seafile-server_*.tar.gz && \
-                    rm -r dev seafile-sources seafile-server-pkgs seafile-server_*.tar.gz && \
+                    rm -r dev seafile-sources seafile-server-pkgs seafile-server_*.tar.gz /root/.cache/ root/.local && \
                     mv seafile-server* seafile-server && \
-                    apk del build-deps build-deps-server
+                    apk del build-deps build-deps-server && \
+                    cd /usr && find . -regex '^.*\(__pycache__\|\.py[co]\)$' -delete
 
 #--------------------------------------------------
 FROM                arm64v8/python:3.7-alpine as pull
