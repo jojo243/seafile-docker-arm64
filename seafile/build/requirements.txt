@@ -2,7 +2,7 @@ captcha==0.3
 certifi==2020.6.20
 chardet==3.0.4
 defusedxml==0.6.0
-Django==1.11.29
+Django==2.2.24
 django-appconf==1.0.4
 django-formtools==2.2
 django-picklefield==2.1.1
