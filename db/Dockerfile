@@ -1,4 +1,4 @@
-FROM	alpine:edge
+FROM	alpine:3.15.0
 
 ARG 	MYSQL_VERSION
 
