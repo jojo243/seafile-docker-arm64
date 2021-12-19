@@ -6,6 +6,8 @@ default: daemon
 
 .PHONY: 1 2 3 4 5 6 build up daemon start down stop clean upgrade backup backup-ssl restore
 
+export DOCKER_BUILDKIT=1
+
 #1.BUILD
 1: build
 
